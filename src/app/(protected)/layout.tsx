@@ -64,7 +64,11 @@ const menuItems = [
   },
 ];
 
-export default async function DashboardPage() {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -123,32 +127,7 @@ export default async function DashboardPage() {
           userName={user.user_metadata?.full_name}
         />
         <main className="flex flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">
-          {/* Page Header */}
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-2">
-              Welcome back! Here's what's happening with your appointments
-              today.
-            </p>
-          </div>
-
-          {/* Stats Cards */}
-          <StatsCards />
-
-          {/* Main Content Grid */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Left Column - 2/3 width */}
-            <div className="lg:col-span-2 space-y-6">
-              <AppointmentsTable />
-              <ServicesList />
-            </div>
-
-            {/* Right Column - 1/3 width */}
-            <div className="space-y-6">
-              <UpcomingAppointments />
-              <QuickActions />
-            </div>
-          </div>
+          <div className="grid gap-6 grid-cols-12">{children}</div>
         </main>
       </SidebarInset>
     </SidebarProvider>
