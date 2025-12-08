@@ -9,18 +9,22 @@ const Page = async () => {
 
   const { data: user } = await supabase.auth.getUser();
 
+  console.log('User: ', user);
   if (!user?.user?.id) {
     redirect('/sign-in');
   }
 
-  const { data } = await supabase
-    .from('services')
-    .select('*')
-    .eq('user_id', user.user.id);
+  const userRole = user?.user?.user_metadata?.role || 'customer';
 
+  const { data } =
+    userRole === 'staff'
+      ? await supabase.from('services').select('*').eq('user_id', user.user.id)
+      : await supabase.from('services').select('*');
+
+  console.log('Data: ', data);
   return (
     <div className="col-span-12">
-      <ServicesList services={data || []} />
+      <ServicesList services={data || []} userRole={userRole} />
     </div>
   );
 };

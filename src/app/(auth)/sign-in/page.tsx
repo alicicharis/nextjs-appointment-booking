@@ -1,4 +1,4 @@
-import SignIn from '@/components/auth/sign-in';
+import SignInForm from '@/components/auth/sign-in-form';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -12,7 +12,7 @@ const Page = async () => {
   return (
     <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
       <div className="w-full max-w-md">
-        <SignIn />
+        <SignInForm />
       </div>
     </main>
   );

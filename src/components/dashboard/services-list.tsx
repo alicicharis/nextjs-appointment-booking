@@ -1,25 +1,35 @@
 import { Button } from '@/components/ui/button';
-import { Clock, DollarSign, Edit, Trash2, Plus } from 'lucide-react';
+import { Clock, DollarSign, Edit, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Tables } from '../../../database.types';
 import ServicesDeleteDialog from '../services/services-delete-dialog';
 
-export function ServicesList({ services }: { services: Tables<'services'>[] }) {
+export function ServicesList({
+  services,
+  userRole,
+}: {
+  services: Tables<'services'>[];
+  userRole: 'customer' | 'staff';
+}) {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold">Services</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your service offerings
-          </p>
+          {userRole === 'staff' && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage your service offerings
+            </p>
+          )}
         </div>
-        <Button size="sm" asChild>
-          <Link href="/services/create">
-            <Plus className="size-4 mr-2" />
-            Add Service
-          </Link>
-        </Button>
+        {userRole === 'staff' && (
+          <Button size="sm" asChild>
+            <Link href="/services/create">
+              <Plus className="size-4 mr-2" />
+              Add Service
+            </Link>
+          </Button>
+        )}
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {services.map((service) => (
@@ -51,7 +61,7 @@ export function ServicesList({ services }: { services: Tables<'services'>[] }) {
               </div>
               <div className="flex items-center gap-1.5 font-semibold text-primary">
                 <DollarSign className="size-4" />
-                <span>${service.price}</span>
+                <span>{service.price}</span>
               </div>
             </div>
           </div>

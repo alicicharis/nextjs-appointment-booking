@@ -17,7 +17,7 @@ export async function createService(payload: CreateServiceSchema) {
 
     const { data: user } = await supabase.auth.getUser();
 
-    if (!user.user?.id) {
+    if (!user.user?.id || user.user?.role !== 'staff') {
       return { error: 'Unauthorized' };
     }
 
@@ -48,6 +48,12 @@ export async function updateService(id: string, payload: CreateServiceSchema) {
 
     const supabase: SupabaseClient<Database> = await createClient();
 
+    const { data: user } = await supabase.auth.getUser();
+
+    if (!user.user?.id || user.user?.role !== 'staff') {
+      return { error: 'Unauthorized' };
+    }
+
     const { error } = await supabase
       .from('services')
       .update(payload)
@@ -67,6 +73,12 @@ export async function updateService(id: string, payload: CreateServiceSchema) {
 export async function deleteService(id: string) {
   try {
     const supabase: SupabaseClient<Database> = await createClient();
+
+    const { data: user } = await supabase.auth.getUser();
+
+    if (!user.user?.id || user.user?.role !== 'staff') {
+      return { error: 'Unauthorized' };
+    }
 
     const { error } = await supabase.from('services').delete().eq('id', id);
 

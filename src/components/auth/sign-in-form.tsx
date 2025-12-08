@@ -1,51 +1,39 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { SignInSchema, signInSchema } from '@/validations';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
-export default function SignIn() {
+export default function SignInForm() {
   const supabase = createClient();
   const router = useRouter();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
+  const form = useForm<SignInSchema>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      setIsLoading(false);
-      return;
-    }
-
-    const { data, error: signInError } = await supabase.auth.signInWithPassword(
-      {
-        email,
-        password,
-      }
-    );
-
-    if (signInError) {
-      setError(signInError.message || 'Invalid email or password');
-      setIsLoading(false);
-      return;
-    }
+  const submitHandler = async (payload: SignInSchema) => {
+    const { data } = await supabase.auth.signInWithPassword({
+      email: payload.email,
+      password: payload.password,
+    });
 
     if (data?.user) {
-      router.push('/');
-      router.refresh();
+      router.push('/dashboard');
     }
   };
 
@@ -60,16 +48,8 @@ export default function SignIn() {
           </p>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-            <AlertCircle className="size-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={form.handleSubmit(submitHandler)} className="space-y-5">
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
@@ -81,12 +61,13 @@ export default function SignIn() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...form.register('email')}
                 className="pl-10 h-11"
-                disabled={isLoading}
-                aria-invalid={error ? 'true' : 'false'}
-                aria-describedby={error ? 'error-message' : undefined}
+                disabled={form.formState.isSubmitting}
+                aria-invalid={form.formState.errors.email ? 'true' : 'false'}
+                aria-describedby={
+                  form.formState.errors.email ? 'error-message' : undefined
+                }
               />
             </div>
           </div>
@@ -111,12 +92,13 @@ export default function SignIn() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...form.register('password')}
                 className="pl-10 pr-10 h-11"
-                disabled={isLoading}
-                aria-invalid={error ? 'true' : 'false'}
-                aria-describedby={error ? 'error-message' : undefined}
+                disabled={form.formState.isSubmitting}
+                aria-invalid={form.formState.errors.password ? 'true' : 'false'}
+                aria-describedby={
+                  form.formState.errors.password ? 'error-message' : undefined
+                }
               />
               <button
                 type="button"
@@ -138,9 +120,9 @@ export default function SignIn() {
           <Button
             type="submit"
             className="w-full h-11 text-base font-medium"
-            disabled={isLoading}
+            disabled={form.formState.isSubmitting}
           >
-            {isLoading ? (
+            {form.formState.isSubmitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
                 Signing in...
