@@ -38,3 +38,45 @@ export async function createService(payload: CreateServiceSchema) {
     return { error: 'Failed to create service' };
   }
 }
+
+export async function updateService(id: string, payload: CreateServiceSchema) {
+  try {
+    const isValidPayload = createServiceSchema.safeParse(payload);
+    if (!isValidPayload.success) {
+      return { error: 'Invalid form data' };
+    }
+
+    const supabase: SupabaseClient<Database> = await createClient();
+
+    const { error } = await supabase
+      .from('services')
+      .update(payload)
+      .eq('id', id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to update service' };
+  }
+}
+
+export async function deleteService(id: string) {
+  try {
+    const supabase: SupabaseClient<Database> = await createClient();
+
+    const { error } = await supabase.from('services').delete().eq('id', id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to delete service' };
+  }
+}

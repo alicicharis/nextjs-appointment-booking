@@ -1,47 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Clock, DollarSign, Edit, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { Tables } from '../../../database.types';
+import ServicesDeleteDialog from '../services/services-delete-dialog';
 
-interface Service {
-  id: string;
-  title: string;
-  duration: number; // in minutes
-  price: number;
-  description?: string;
-}
-
-const mockServices: Service[] = [
-  {
-    id: '1',
-    title: 'Haircut & Styling',
-    duration: 45,
-    price: 50,
-    description: 'Professional haircut with styling',
-  },
-  {
-    id: '2',
-    title: 'Full Service',
-    duration: 90,
-    price: 120,
-    description: 'Complete service package',
-  },
-  {
-    id: '3',
-    title: 'Consultation',
-    duration: 30,
-    price: 25,
-    description: 'Initial consultation session',
-  },
-  {
-    id: '4',
-    title: 'Color Treatment',
-    duration: 120,
-    price: 150,
-    description: 'Full color treatment service',
-  },
-];
-
-export function ServicesList() {
+export function ServicesList({ services }: { services: Tables<'services'>[] }) {
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -59,7 +22,7 @@ export function ServicesList() {
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {mockServices.map((service) => (
+        {services.map((service) => (
           <div
             key={service.id}
             className="group relative rounded-lg border bg-background p-5 hover:shadow-md transition-all"
@@ -67,18 +30,13 @@ export function ServicesList() {
             <div className="flex items-start justify-between mb-3">
               <h3 className="font-semibold text-lg">{service.title}</h3>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon" className="size-8">
-                  <Edit className="size-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-destructive"
-                >
-                  <Trash2 className="size-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
+                <Link href={`/services/update/${service.id}`}>
+                  <Button variant="ghost" size="icon" className="size-8">
+                    <Edit className="size-4" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                </Link>
+                <ServicesDeleteDialog service={service} />
               </div>
             </div>
             {service.description && (
