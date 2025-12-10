@@ -14,9 +14,9 @@ import {
   SidebarProvider,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { getAllNotifications } from '@/data';
+import { getAllUnreadNotifications } from '@/data';
 import { createClient } from '@/lib/supabase/server';
-import { Calendar, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Bell, Calendar, LayoutDashboard, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
@@ -30,6 +30,11 @@ const menuItems = [
     title: 'Services',
     icon: Sparkles,
     url: '/services',
+  },
+  {
+    title: 'Notifications',
+    icon: Bell,
+    url: '/notifications',
   },
 ];
 
@@ -47,7 +52,7 @@ export default async function Layout({
     redirect('/sign-in');
   }
 
-  const notifications = await getAllNotifications(supabase, user.id);
+  const notifications = await getAllUnreadNotifications(supabase, user.id);
 
   return (
     <SidebarProvider>

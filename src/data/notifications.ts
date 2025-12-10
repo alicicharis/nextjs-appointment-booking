@@ -8,6 +8,19 @@ export const getAllNotifications = async (
   supabase: SupabaseClient<Database>,
   userId: string
 ) => {
+  const { data } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  return data;
+};
+
+export const getAllUnreadNotifications = async (
+  supabase: SupabaseClient<Database>,
+  userId: string
+) => {
   const { data, error } = await supabase
     .from('notifications')
     .select('*')
