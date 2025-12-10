@@ -1,6 +1,6 @@
 'use client';
 
-import { updateAppointmentStatus } from '@/actions';
+import { updateAppointmentStatusAction } from '@/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -54,9 +54,11 @@ const statusColors = {
 export function AppointmentsTable({
   appointments,
   role,
+  error,
 }: {
   appointments: Appointment[];
   role: 'staff' | 'customer';
+  error: string | null;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -69,6 +71,10 @@ export function AppointmentsTable({
         appointment.status === statusFilter) ||
       statusFilter === 'all'
   );
+
+  if (error) {
+    toast.error(error);
+  }
 
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
@@ -254,7 +260,7 @@ const AppointmentEditModal = ({
 
   const updateStatusHandler = async () => {
     setUpdating(true);
-    const response = await updateAppointmentStatus({
+    const response = await updateAppointmentStatusAction({
       appointmentId: appointment.id,
       status: status,
     });
@@ -263,8 +269,8 @@ const AppointmentEditModal = ({
       setOpen(false);
       router.refresh();
     }
-    if (response?.error) {
-      toast.error(response?.error);
+    if (!response?.success) {
+      toast.error(response.error);
     }
     setUpdating(false);
   };
@@ -325,7 +331,7 @@ const AppointmentCancelModal = ({
 
   const cancelAppointmentHandler = async () => {
     setCancelling(true);
-    const response = await updateAppointmentStatus({
+    const response = await updateAppointmentStatusAction({
       appointmentId: appointment.id,
       status: 'cancelled',
     });
@@ -335,8 +341,8 @@ const AppointmentCancelModal = ({
       setOpen(false);
       router.refresh();
     }
-    if (response?.error) {
-      toast.error(response?.error);
+    if (!response?.success) {
+      toast.error(response.error);
     }
     setCancelling(false);
   };

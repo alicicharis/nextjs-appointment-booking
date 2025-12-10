@@ -3,15 +3,16 @@
 import { createClient } from '@/lib/supabase/server';
 import { isStaffAuthorized } from '@/lib/utils';
 
+import { createService, deleteService, updateService } from '@/data';
+import { createServiceSchema, CreateServiceSchema } from '@/validations';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database, TablesInsert } from '../../database.types';
-import { createServiceSchema, CreateServiceSchema } from '@/validations';
 
-export async function createService(payload: CreateServiceSchema) {
+export async function createServiceAction(payload: CreateServiceSchema) {
   try {
     const isValidPayload = createServiceSchema.safeParse(payload);
     if (!isValidPayload.success) {
-      return { error: 'Invalid form data' };
+      throw new Error('Invalid form data');
     }
 
     const supabase: SupabaseClient<Database> = await createClient();
@@ -19,7 +20,7 @@ export async function createService(payload: CreateServiceSchema) {
     const { data: user } = await supabase.auth.getUser();
 
     if (!isStaffAuthorized(user)) {
-      return { error: 'Unauthorized' };
+      throw new Error('Unauthorized');
     }
 
     const dbPayload: TablesInsert<'services'> = {
@@ -27,24 +28,23 @@ export async function createService(payload: CreateServiceSchema) {
       ...payload,
     };
 
-    const { error } = await supabase.from('services').insert(dbPayload);
+    const newService = await createService(supabase, dbPayload);
 
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { success: true };
+    return { success: true, data: newService };
   } catch (error) {
-    console.error(error);
-    return { error: 'Failed to create service' };
+    console.error('Error in createServiceAction: ', error);
+    return { success: false, error: 'Failed to create service' };
   }
 }
 
-export async function updateService(id: string, payload: CreateServiceSchema) {
+export async function updateServiceAction(
+  id: string,
+  payload: CreateServiceSchema
+) {
   try {
     const isValidPayload = createServiceSchema.safeParse(payload);
     if (!isValidPayload.success) {
-      return { error: 'Invalid form data' };
+      throw new Error('Invalid form data');
     }
 
     const supabase: SupabaseClient<Database> = await createClient();
@@ -52,44 +52,33 @@ export async function updateService(id: string, payload: CreateServiceSchema) {
     const { data: user } = await supabase.auth.getUser();
 
     if (!isStaffAuthorized(user)) {
-      return { error: 'Unauthorized' };
+      throw new Error('Unauthorized');
     }
 
-    const { error } = await supabase
-      .from('services')
-      .update(payload)
-      .eq('id', id);
+    const updatedService = await updateService(supabase, id, payload);
 
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { success: true };
+    return { success: true, data: updatedService };
   } catch (error) {
-    console.error(error);
-    return { error: 'Failed to update service' };
+    console.error('Error in updateServiceAction: ', error);
+    return { success: false, error: 'Failed to update service' };
   }
 }
 
-export async function deleteService(id: string) {
+export async function deleteServiceAction(id: string) {
   try {
     const supabase: SupabaseClient<Database> = await createClient();
 
     const { data: user } = await supabase.auth.getUser();
 
     if (!isStaffAuthorized(user)) {
-      return { error: 'Unauthorized' };
+      throw new Error('Unauthorized');
     }
 
-    const { error } = await supabase.from('services').delete().eq('id', id);
+    const deletedService = await deleteService(supabase, id);
 
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { success: true };
+    return { success: true, data: deletedService };
   } catch (error) {
-    console.error(error);
-    return { error: 'Failed to delete service' };
+    console.error('Error in deleteServiceAction: ', error);
+    return { success: false, error: 'Failed to delete service' };
   }
 }

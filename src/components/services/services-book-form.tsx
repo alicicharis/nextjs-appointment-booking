@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Tables } from '../../../database.types';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
-import { bookAppointment } from '@/actions/appointments';
+import { createAppointmentAction } from '@/actions/appointments';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -170,14 +170,14 @@ const ServicesBookForm = ({
     appointments,
   ]);
 
-  const bookAppointmentHandler = async () => {
+  const createAppointmentHandler = async () => {
     try {
       const year = date!.getFullYear();
       const month = String(date!.getMonth() + 1).padStart(2, '0');
       const day = String(date!.getDate()).padStart(2, '0');
       const dateFormatted = `${year}-${month}-${day}`;
 
-      const response = await bookAppointment({
+      const response = await createAppointmentAction({
         serviceId: service.id,
         staffId: selectedStaffId!,
         startTime: selectedSlot!,
@@ -189,7 +189,7 @@ const ServicesBookForm = ({
         router.push('/dashboard');
       }
 
-      if (response?.error) {
+      if (!response?.success) {
         toast.error(response.error);
       }
     } catch (error) {
@@ -211,7 +211,7 @@ const ServicesBookForm = ({
         <Button
           disabled={!selectedSlot || !date || !selectedStaffId}
           className="min-w-[100px]"
-          onClick={bookAppointmentHandler}
+          onClick={createAppointmentHandler}
         >
           Book Appointment
         </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { createService } from '@/actions/services';
+import { createServiceAction } from '@/actions/services';
 import { CreateServiceSchema, createServiceSchema } from '@/validations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
@@ -26,16 +26,16 @@ const ServicesCreateForm = () => {
 
   const onSubmit = async (data: CreateServiceSchema) => {
     try {
-      const response = await createService(data);
-
-      if (response?.error) {
-        toast.error(response?.error);
-      }
+      const response = await createServiceAction(data);
 
       if (response?.success) {
         toast.success('Service created successfully');
         form.reset();
         router.push('/services');
+      }
+
+      if (!response?.success) {
+        toast.error(response.error);
       }
     } catch (error) {
       toast.error('Failed to create service');

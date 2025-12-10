@@ -1,6 +1,6 @@
 'use client';
 
-import { updateNotificationStatus } from '@/actions/notifications';
+import { updateNotificationStatusAction } from '@/actions/notifications';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { createClient } from '@/lib/supabase/client';
@@ -84,7 +84,7 @@ export function Header({
       console.log('Updatng notification status...');
       await Promise.all(
         notifications.map(async (notification) => {
-          await updateNotificationStatus(notification.id);
+          await updateNotificationStatusAction(notification.id);
         })
       );
     };

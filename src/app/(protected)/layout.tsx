@@ -5,7 +5,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -52,7 +51,12 @@ export default async function Layout({
     redirect('/sign-in');
   }
 
-  const notifications = await getAllUnreadNotifications(supabase, user.id);
+  const notifications = await getAllUnreadNotifications(supabase, user.id)
+    .then((data) => data)
+    .catch((error) => {
+      console.error('Error in getAllUnreadNotifications: ', error);
+      return [];
+    });
 
   return (
     <SidebarProvider>
@@ -72,7 +76,6 @@ export default async function Layout({
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => (
@@ -101,7 +104,7 @@ export default async function Layout({
         <Header
           userEmail={user.email}
           userName={user.user_metadata?.full_name}
-          initialNotifications={notifications}
+          initialNotifications={notifications || []}
           userId={user.id}
         />
         <main className="flex flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">

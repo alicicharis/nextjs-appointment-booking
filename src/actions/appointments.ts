@@ -9,8 +9,9 @@ import {
   createAppointment,
   createNotification,
 } from '@/data';
+import { timeToTimestampz } from '@/lib/utils';
 
-export const bookAppointment = async (payload: {
+export const createAppointmentAction = async (payload: {
   serviceId: string;
   staffId: string;
   startTime: string;
@@ -21,13 +22,13 @@ export const bookAppointment = async (payload: {
     const { data: user } = await supabase.auth.getUser();
 
     if (!user?.user?.id) {
-      return { error: 'Unauthorized' };
+      throw new Error('Unauthorized');
     }
 
     const serviceData = await getServiceById(supabase, payload.serviceId);
 
     if (!serviceData) {
-      return { error: 'Service not found' };
+      throw new Error('Service not found');
     }
 
     const [startHours, startMinutes] = payload.startTime.split(':').map(Number);
@@ -51,7 +52,7 @@ export const bookAppointment = async (payload: {
     );
 
     if (existingAppointments && existingAppointments?.length > 0) {
-      return { error: 'Slot already booked' };
+      throw new Error('Slot already booked');
     }
 
     const startTimeFormatted = timeToTimestampz(
@@ -60,7 +61,7 @@ export const bookAppointment = async (payload: {
     );
     const endTimeFormatted = timeToTimestampz(endTimeString, payload.date);
 
-    const { error: newAppointmentError } = await createAppointment(supabase, {
+    await createAppointment(supabase, {
       customerId: user.user.id,
       serviceId: payload.serviceId,
       staffId: payload.staffId,
@@ -68,24 +69,22 @@ export const bookAppointment = async (payload: {
       endTime: endTimeFormatted,
     });
 
-    if (newAppointmentError) {
-      return { error: newAppointmentError.message };
-    }
-
     await createNotification(supabase, {
       title: 'New Appointment Booked',
       body: `New appointment booked for ${serviceData?.title} by ${user.user.user_metadata.username}`,
       userId: payload.staffId,
+    }).catch((error) => {
+      console.error('Error in createNotification: ', error);
     });
 
-    return { success: true };
+    return { success: true, data: null };
   } catch (error) {
-    console.log('Error creating appointment: ', error);
-    return { error: 'Failed to create appointment' };
+    console.error('Error in createAppointmentAction: ', error);
+    return { success: false, error: 'Failed to create appointment' };
   }
 };
 
-export const updateAppointmentStatus = async (payload: {
+export const updateAppointmentStatusAction = async (payload: {
   appointmentId: string;
   status: string;
 }) => {
@@ -94,7 +93,7 @@ export const updateAppointmentStatus = async (payload: {
     const { data: user } = await supabase.auth.getUser();
 
     if (!user?.user?.id) {
-      return { error: 'Unauthorized' };
+      throw new Error('Unauthorized');
     }
 
     const { error } = await supabase
@@ -104,20 +103,12 @@ export const updateAppointmentStatus = async (payload: {
 
     if (error) {
       console.log('Error: ', error);
-      return { error: 'Failed to update appointment status' };
+      throw new Error('Failed to update appointment status');
     }
 
-    return { success: true };
+    return { success: true, data: null };
   } catch (error) {
-    console.log('Error updating appointment status: ', error);
-    return { error: 'Failed to update appointment status' };
+    console.error('Error in updateAppointmentStatusAction: ', error);
+    return { success: false, error: 'Failed to update appointment status' };
   }
 };
-
-function timeToTimestampz(time: string, date?: string): string {
-  const day = date ?? new Date().toISOString().split('T')[0];
-
-  const timeWithSeconds = time.length === 5 ? `${time}:00` : time;
-
-  return `${day}T${timeWithSeconds}.000Z`;
-}

@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { deleteService } from '@/actions/services';
+import { deleteServiceAction } from '@/actions/services';
 import { Tables } from '../../../database.types';
 import { Loader2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -26,14 +26,16 @@ const ServicesDeleteDialog = ({ service }: { service: Tables<'services'> }) => {
 
   const deleteHandler = async () => {
     setDeleting(true);
-    const response = await deleteService(service.id);
+    const response = await deleteServiceAction(service.id);
+
     if (response?.success) {
       toast.success('Service deleted successfully');
       setOpen(false);
       router.refresh();
     }
-    if (response?.error) {
-      toast.error(response?.error);
+
+    if (!response?.success) {
+      toast.error(response.error);
     }
     setDeleting(false);
   };

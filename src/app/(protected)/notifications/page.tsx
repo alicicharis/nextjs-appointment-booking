@@ -14,7 +14,12 @@ const Page = async () => {
     redirect('/sign-in');
   }
 
-  const notifications = await getAllNotifications(supabase, user.user.id);
+  const notifications = await getAllNotifications(supabase, user.user.id)
+    .then((data) => data)
+    .catch((error) => {
+      console.error('Error in getAllNotifications: ', error);
+      return [];
+    });
 
   return (
     <div className="col-span-12">

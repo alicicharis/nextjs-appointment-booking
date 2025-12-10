@@ -1,6 +1,6 @@
 'use client';
 
-import { updateNotificationStatus } from '@/actions/notifications';
+import { updateNotificationStatusAction } from '@/actions/notifications';
 import { Tables } from '../../../database.types';
 import { Button } from '../ui/button';
 import { Eye, Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ const NotificationsList = ({
 
   const updateNotificationStatusHandler = async (notificationId: string) => {
     setLoading(true);
-    await updateNotificationStatus(notificationId);
+    await updateNotificationStatusAction(notificationId);
     setLoading(false);
     router.refresh();
   };
