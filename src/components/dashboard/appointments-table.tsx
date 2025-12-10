@@ -1,77 +1,46 @@
 'use client';
 
+import { updateAppointmentStatus } from '@/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Calendar,
-  Clock,
-  User,
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-  Edit,
-  X,
-} from 'lucide-react';
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar, Clock, Edit, Loader2, Search, User, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import Link from 'next/link';
 
-interface Appointment {
+type Appointment = {
   id: string;
-  clientName: string;
-  service: string;
-  date: string;
-  time: string;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-  amount: number;
-}
-
-const mockAppointments: Appointment[] = [
-  {
-    id: '1',
-    clientName: 'John Doe',
-    service: 'Haircut & Styling',
-    date: '2024-01-15',
-    time: '10:00 AM',
-    status: 'confirmed',
-    amount: 50,
-  },
-  {
-    id: '2',
-    clientName: 'Jane Smith',
-    service: 'Consultation',
-    date: '2024-01-15',
-    time: '2:30 PM',
-    status: 'confirmed',
-    amount: 25,
-  },
-  {
-    id: '3',
-    clientName: 'Mike Johnson',
-    service: 'Full Service',
-    date: '2024-01-16',
-    time: '4:00 PM',
-    status: 'pending',
-    amount: 120,
-  },
-  {
-    id: '4',
-    clientName: 'Sarah Williams',
-    service: 'Color Treatment',
-    date: '2024-01-14',
-    time: '11:00 AM',
-    status: 'completed',
-    amount: 150,
-  },
-  {
-    id: '5',
-    clientName: 'David Brown',
-    service: 'Haircut & Styling',
-    date: '2024-01-17',
-    time: '3:00 PM',
-    status: 'pending',
-    amount: 50,
-  },
-];
+  start_time: string;
+  status: string;
+  services: {
+    title: string;
+    price: number;
+  };
+  customer: {
+    id: string;
+    username: string | null;
+  };
+};
 
 const statusColors = {
   confirmed:
@@ -82,17 +51,24 @@ const statusColors = {
   completed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
-export function AppointmentsTable() {
+export function AppointmentsTable({
+  appointments,
+  role,
+}: {
+  appointments: Appointment[];
+  role: 'staff' | 'customer';
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const filteredAppointments = mockAppointments.filter((apt) => {
-    const matchesSearch =
-      apt.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.service.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || apt.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredAppointments = appointments.filter(
+    (appointment) =>
+      (appointment.services.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) &&
+        appointment.status === statusFilter) ||
+      statusFilter === 'all'
+  );
 
   return (
     <div className="rounded-lg border bg-card p-6 shadow-sm">
@@ -104,10 +80,14 @@ export function AppointmentsTable() {
               Manage and track all appointments
             </p>
           </div>
-          <Button size="sm">
-            <Calendar className="size-4 mr-2" />
-            New Appointment
-          </Button>
+          {role === 'customer' && (
+            <Link href="/services">
+              <Button size="sm">
+                <Calendar className="size-4 mr-2" />
+                New Appointment
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Filters */}
@@ -115,7 +95,7 @@ export function AppointmentsTable() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search by client or service..."
+              placeholder="Search by service..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -201,49 +181,50 @@ export function AppointmentsTable() {
                         <User className="size-4 text-primary" />
                       </div>
                       <span className="font-medium">
-                        {appointment.clientName}
+                        {appointment.customer?.username}
                       </span>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-sm">{appointment.service}</td>
+                  <td className="py-4 px-4 text-sm">
+                    {appointment.services.title}
+                  </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="size-4 text-muted-foreground" />
-                      <span>{appointment.date}</span>
+                      <span>
+                        {appointment.start_time?.toString().split('T')[0]}
+                      </span>
                       <Clock className="size-4 text-muted-foreground ml-2" />
-                      <span>{appointment.time}</span>
+                      <span>
+                        {appointment.start_time
+                          ?.toString()
+                          .split('T')[1]
+                          .slice(0, 5)}
+                      </span>
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        statusColors[appointment.status]
+                        statusColors[
+                          appointment.status as keyof typeof statusColors
+                        ]
                       }`}
                     >
                       {appointment.status}
                     </span>
                   </td>
                   <td className="py-4 px-4 font-semibold">
-                    ${appointment.amount}
+                    ${appointment.services.price}
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="size-8">
-                        <Eye className="size-4" />
-                        <span className="sr-only">View</span>
-                      </Button>
-                      <Button variant="ghost" size="icon" className="size-8">
-                        <Edit className="size-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-destructive"
-                      >
-                        <X className="size-4" />
-                        <span className="sr-only">Cancel</span>
-                      </Button>
+                      {role === 'staff' && (
+                        <AppointmentEditModal appointment={appointment} />
+                      )}
+                      {role === 'customer' && (
+                        <AppointmentCancelModal appointment={appointment} />
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -255,3 +236,133 @@ export function AppointmentsTable() {
     </div>
   );
 }
+
+const AppointmentEditModal = ({
+  appointment,
+}: {
+  appointment: Appointment;
+}) => {
+  const router = useRouter();
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [status, setStatus] = useState(appointment.status);
+  const [updating, setUpdating] = useState<boolean>(false);
+
+  const updateStatusHandler = async () => {
+    setUpdating(true);
+    const response = await updateAppointmentStatus({
+      appointmentId: appointment.id,
+      status: status,
+    });
+    if (response?.success) {
+      toast.success('Appointment status updated successfully');
+      setOpen(false);
+      router.refresh();
+    }
+    if (response?.error) {
+      toast.error(response?.error);
+    }
+    setUpdating(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-8">
+          <Edit className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Change status</DialogTitle>
+        </DialogHeader>
+
+        <Select value={status} onValueChange={(value) => setStatus(value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={status} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Status</SelectLabel>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            variant="default"
+            disabled={updating || appointment.status === status}
+            onClick={updateStatusHandler}
+          >
+            {updating ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const AppointmentCancelModal = ({
+  appointment,
+}: {
+  appointment: Appointment;
+}) => {
+  const router = useRouter();
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [cancelling, setCancelling] = useState<boolean>(false);
+
+  const cancelAppointmentHandler = async () => {
+    setCancelling(true);
+    const response = await updateAppointmentStatus({
+      appointmentId: appointment.id,
+      status: 'cancelled',
+    });
+
+    if (response?.success) {
+      toast.success('Appointment cancelled successfully');
+      setOpen(false);
+      router.refresh();
+    }
+    if (response?.error) {
+      toast.error(response?.error);
+    }
+    setCancelling(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-8">
+          <X className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cancel Appointment</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to cancel this appointment?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">No</Button>
+          </DialogClose>
+          <Button
+            variant="destructive"
+            onClick={cancelAppointmentHandler}
+            disabled={cancelling}
+          >
+            {cancelling ? <Loader2 className="size-4 animate-spin" /> : 'Yes'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

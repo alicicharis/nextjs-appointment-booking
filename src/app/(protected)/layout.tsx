@@ -35,32 +35,12 @@ const menuItems = [
   {
     title: 'Dashboard',
     icon: LayoutDashboard,
-    url: '/',
-  },
-  {
-    title: 'Appointments',
-    icon: Calendar,
-    url: '/appointments',
+    url: '/dashboard',
   },
   {
     title: 'Services',
     icon: Sparkles,
     url: '/services',
-  },
-  {
-    title: 'Clients',
-    icon: Users,
-    url: '/clients',
-  },
-  {
-    title: 'Calendar',
-    icon: Calendar,
-    url: '/calendar',
-  },
-  {
-    title: 'Settings',
-    icon: Settings,
-    url: '/settings',
   },
 ];
 

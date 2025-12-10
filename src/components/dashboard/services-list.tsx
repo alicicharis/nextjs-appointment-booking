@@ -21,6 +21,11 @@ export function ServicesList({
               Manage your service offerings
             </p>
           )}
+          {userRole === 'customer' && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Browse our service offerings
+            </p>
+          )}
         </div>
         {userRole === 'staff' && (
           <Button size="sm" asChild>

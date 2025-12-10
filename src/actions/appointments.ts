@@ -78,6 +78,35 @@ export const bookAppointment = async (payload: {
   }
 };
 
+export const updateAppointmentStatus = async (payload: {
+  appointmentId: string;
+  status: string;
+}) => {
+  try {
+    const supabase: SupabaseClient<Database> = await createClient();
+    const { data: user } = await supabase.auth.getUser();
+
+    if (!user?.user?.id) {
+      return { error: 'Unauthorized' };
+    }
+
+    const { error } = await supabase
+      .from('appointments')
+      .update({ status: payload.status })
+      .eq('id', payload.appointmentId);
+
+    if (error) {
+      console.log('Error: ', error);
+      return { error: 'Failed to update appointment status' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.log('Error updating appointment status: ', error);
+    return { error: 'Failed to update appointment status' };
+  }
+};
+
 function timeToTimestampz(time: string, date?: string): string {
   const day = date ?? new Date().toISOString().split('T')[0];
 

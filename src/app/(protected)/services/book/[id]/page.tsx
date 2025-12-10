@@ -39,7 +39,6 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     return <div>Service not found</div>;
   }
 
-  console.log('DATA: ', data);
   return (
     <div className="col-span-12">
       <ServicesBookForm

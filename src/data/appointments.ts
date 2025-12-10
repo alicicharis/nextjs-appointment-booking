@@ -1,6 +1,27 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '../../database.types';
 
+export const getAllAppointments = async (
+  supabase: SupabaseClient<Database>,
+  userId: string
+) => {
+  const { data } = await supabase
+    .from('appointments')
+    .select(
+      `
+      id,
+      start_time,
+      status,
+      services (title, price),
+      customer:profiles!customer_id (id, username)
+      `
+    )
+    .or(`customer_id.eq.${userId},staff_id.eq.${userId}`)
+    .order('start_time', { ascending: false });
+
+  return data;
+};
+
 export const getExistingAppointments = async (
   supabase: SupabaseClient<Database>,
   staffId: string,
