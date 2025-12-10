@@ -7,6 +7,7 @@ import {
   getExistingAppointments,
   getServiceById,
   createAppointment,
+  createNotification,
 } from '@/data';
 
 export const bookAppointment = async (payload: {
@@ -70,6 +71,12 @@ export const bookAppointment = async (payload: {
     if (newAppointmentError) {
       return { error: newAppointmentError.message };
     }
+
+    await createNotification(supabase, {
+      title: 'New Appointment Booked',
+      body: `New appointment booked for ${serviceData?.title} by ${user.user.user_metadata.username}`,
+      userId: payload.staffId,
+    });
 
     return { success: true };
   } catch (error) {
