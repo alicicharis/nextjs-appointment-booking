@@ -219,12 +219,16 @@ export function AppointmentsTable({
                   </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center justify-end gap-2">
-                      {role === 'staff' && (
-                        <AppointmentEditModal appointment={appointment} />
-                      )}
-                      {role === 'customer' && (
-                        <AppointmentCancelModal appointment={appointment} />
-                      )}
+                      {role === 'staff' &&
+                        appointment.status !== 'cancelled' &&
+                        appointment.status !== 'completed' && (
+                          <AppointmentEditModal appointment={appointment} />
+                        )}
+                      {role === 'customer' &&
+                        appointment.status !== 'completed' &&
+                        appointment.status !== 'cancelled' && (
+                          <AppointmentCancelModal appointment={appointment} />
+                        )}
                     </div>
                   </td>
                 </tr>

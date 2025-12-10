@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { Header } from '@/components/dashboard/header';
 import {
   Sidebar,
   SidebarContent,
@@ -8,28 +7,17 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarInset,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { Header } from '@/components/dashboard/header';
-import { StatsCards } from '@/components/dashboard/stats-cards';
-import { UpcomingAppointments } from '@/components/dashboard/upcoming-appointments';
-import { QuickActions } from '@/components/dashboard/quick-actions';
-import { ServicesList } from '@/components/dashboard/services-list';
-import { AppointmentsTable } from '@/components/dashboard/appointments-table';
-import {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  Settings,
-  ClipboardList,
-  Sparkles,
-} from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
+import { Calendar, LayoutDashboard, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 const menuItems = [
   {
