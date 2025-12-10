@@ -35,13 +35,23 @@ export function Header({
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const topic = `user:${userId}:notifications`;
-
     const channel = supabase
-      .channel(topic, { config: { private: true } })
-      .on('broadcast', { event: 'INSERT' }, (payload) => {
-        setNotifications((prevState) => [...prevState, payload.payload.record]);
-      })
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          setNotifications((prevState) => [
+            ...prevState,
+            payload.new as Tables<'notifications'>,
+          ]);
+        }
+      )
       .subscribe();
 
     return () => {
