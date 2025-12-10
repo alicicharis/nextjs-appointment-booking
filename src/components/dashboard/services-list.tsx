@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Clock, DollarSign, Edit, Plus } from 'lucide-react';
+import { Calendar, Clock, DollarSign, Edit, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Tables } from '../../../database.types';
 import ServicesDeleteDialog from '../services/services-delete-dialog';
@@ -40,13 +40,26 @@ export function ServicesList({
             <div className="flex items-start justify-between mb-3">
               <h3 className="font-semibold text-lg">{service.title}</h3>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Link href={`/services/update/${service.id}`}>
-                  <Button variant="ghost" size="icon" className="size-8">
-                    <Edit className="size-4" />
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                </Link>
-                <ServicesDeleteDialog service={service} />
+                {userRole === 'staff' && (
+                  <Link href={`/services/update/${service.id}`}>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <Edit className="size-4" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                  </Link>
+                )}
+                {userRole === 'staff' && (
+                  <ServicesDeleteDialog service={service} />
+                )}
+                {userRole === 'customer' && (
+                  <Link href={`/services/book/${service.id}`}>
+                    {' '}
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <Calendar className="size-4" />
+                      <span className="sr-only">Book</span>
+                    </Button>{' '}
+                  </Link>
+                )}
               </div>
             </div>
             {service.description && (

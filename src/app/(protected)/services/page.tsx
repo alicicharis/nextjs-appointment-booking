@@ -9,7 +9,6 @@ const Page = async () => {
 
   const { data: user } = await supabase.auth.getUser();
 
-  console.log('User: ', user);
   if (!user?.user?.id) {
     redirect('/sign-in');
   }
@@ -21,7 +20,6 @@ const Page = async () => {
       ? await supabase.from('services').select('*').eq('user_id', user.user.id)
       : await supabase.from('services').select('*');
 
-  console.log('Data: ', data);
   return (
     <div className="col-span-12">
       <ServicesList services={data || []} userRole={userRole} />

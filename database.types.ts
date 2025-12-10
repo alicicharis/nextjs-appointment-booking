@@ -67,7 +67,7 @@ export type Database = {
             foreignKeyName: "appointments_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "staff"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -169,66 +169,47 @@ export type Database = {
           },
         ]
       }
-      staff: {
-        Row: {
-          bio: string | null
-          created_at: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       staff_availability: {
         Row: {
           created_at: string | null
           end_time: string
           id: string
-          staff_id: string
+          service_id: string
           start_time: string
+          user_id: string
           weekday: number
         }
         Insert: {
           created_at?: string | null
           end_time: string
           id?: string
-          staff_id: string
+          service_id: string
           start_time: string
+          user_id: string
           weekday: number
         }
         Update: {
           created_at?: string | null
           end_time?: string
           id?: string
-          staff_id?: string
+          service_id?: string
           start_time?: string
+          user_id?: string
           weekday?: number
         }
         Relationships: [
           {
-            foreignKeyName: "staff_availability_staff_id_fkey"
-            columns: ["staff_id"]
+            foreignKeyName: "staff_availability_service_id_fkey"
+            columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "staff"
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

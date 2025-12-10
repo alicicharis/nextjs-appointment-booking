@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { isStaffAuthorized } from '@/lib/utils';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database, TablesInsert } from '../../database.types';
@@ -17,12 +18,12 @@ export async function createService(payload: CreateServiceSchema) {
 
     const { data: user } = await supabase.auth.getUser();
 
-    if (!user.user?.id || user.user?.role !== 'staff') {
+    if (!isStaffAuthorized(user)) {
       return { error: 'Unauthorized' };
     }
 
     const dbPayload: TablesInsert<'services'> = {
-      user_id: user.user?.id,
+      user_id: user.user.id,
       ...payload,
     };
 
@@ -50,7 +51,7 @@ export async function updateService(id: string, payload: CreateServiceSchema) {
 
     const { data: user } = await supabase.auth.getUser();
 
-    if (!user.user?.id || user.user?.role !== 'staff') {
+    if (!isStaffAuthorized(user)) {
       return { error: 'Unauthorized' };
     }
 
@@ -76,7 +77,7 @@ export async function deleteService(id: string) {
 
     const { data: user } = await supabase.auth.getUser();
 
-    if (!user.user?.id || user.user?.role !== 'staff') {
+    if (!isStaffAuthorized(user)) {
       return { error: 'Unauthorized' };
     }
 
